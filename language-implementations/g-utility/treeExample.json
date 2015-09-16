@@ -1,0 +1,6 @@
+{"producciones":[
+        {"pizq":"S","pderechas":[["A"],["B"]]},
+        {"pizq":"A","pderechas":[["a","a","A", "b"],["a", "A"], []]},
+        {"pizq":"B","pderechas":[["b","b","B", "a"],["b", "B"], []]}
+        ]
+}
