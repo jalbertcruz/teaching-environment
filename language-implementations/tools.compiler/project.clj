@@ -13,7 +13,7 @@
 
   :description ""
 
-  :url "https://github.com/jalbertcruz/language-implementations/tree/master/tools.compiler"
+  :url "https://github.com/jalbertcruz/teaching-environment/tree/master/language-implementations/tools.compiler"
 
   :license {:name "GNU Affero General Public License"
             :url "http:www.gnu.org/licenses/agpl-3.0.txt"}
