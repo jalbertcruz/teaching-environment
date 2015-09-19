@@ -1,0 +1,72 @@
+
+package {{langName}}.compiler.syntax_analyzer;
+
+import compiler.errors.ErrorReporter;
+import compiler.errors.SyntacticError;
+import compiler.lexical_analyzer.LexicalAnalizer;
+import compiler.syntax_analyzer.SyntaxAnalyzer;
+import {{kTypeName}};
+import {{langName}}.compiler.abstract_syntax_tree.*;
+import {{tTypeName}};
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import static {{kTypeName}}.*;
+
+public class Parser extends SyntaxAnalyzer<{{kTypeName}}, ASTVisitor, {{tTypeName}}> {
+
+        {{#first-sets-values}}
+         private Set<{{kTypeName}}> first{{name}};
+        {{/first-sets-values}}
+
+
+        public Parser(LexicalAnalizer<{{kTypeName}}, {{tTypeName}}> in, ErrorReporter er) {
+            super(in, er);
+
+            {{#first-sets-values}}
+            first{{name}} = mkFirsts({{tokens}});
+            {{/first-sets-values}}
+
+        }
+
+        @Override
+        public ASTVisitor parse() {
+            consume();
+            {{S}}();
+            match({{kTypeName}}.EOT);
+            return null;
+        }
+
+        {{#productions}}
+
+        public Object {{name}}() {
+            int productionSelected = selectProduction({{firsts-values}});
+            switch (productionSelected) {
+            {{#firsts}}
+                case {{i}}:
+                {{#symbols}}
+
+                    {{#is-token}}
+                    match({{name}});
+                    {{/is-token}}
+                    {{^is-token}}
+                    {{name}}();
+                    {{/is-token}}
+
+                {{/symbols}}
+                    break;
+              {{/firsts}}
+
+            {{^epsilon}}
+                default:
+                    er.add(new SyntacticError(ct.line, "Syntax Error: "));
+            {{/epsilon}}
+            }
+            return null;
+        }
+
+        {{/productions}}
+
+  }

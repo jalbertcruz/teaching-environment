@@ -12,8 +12,9 @@
 (ns tools.compiler.grammar
   (:require [clojure.set :as cset])
   (:require [clojure.core.match :refer [match]])
+  (:require [clojure.string :as cstr])
+  (:require [clostache.parser :refer [render-resource]])
   )
-
 
 (declare compute-first-sets)
 
@@ -51,7 +52,7 @@
   (def flag-follow false)
   )
 
-(defn
+(defn-
   ^{:doc "Total size of FIRST (or FOLLOW) sets"
     :arglists '([d])}
   count-dict [d] (reduce + (for [[_ ys] d] (count @ys))))
@@ -80,15 +81,7 @@
     @res)
   )
 
-(defn LL1-parser-firsts []
-  (into {} (for [[k v] P] [k
-                           (for [l v] (if (= l [])
-                                        {}
-                                        (first-set-str l)
-                                        ))
-                           ])))
-
-(defn
+(defn-
   ^{:doc "Calculate the first sets"
     :arglists '([])}
   compute-first-sets []
@@ -121,7 +114,7 @@
       (when-not (= cant fcant)
         (recur fcant)))))
 
-(defn
+(defn-
   ^{:doc "Calculate the follow sets"
     :arglists '([])}
   compute-follow-sets []
@@ -167,4 +160,65 @@
   (when-not flag-follow
     (compute-follow-sets))
   (into {} (for [[x ys] follow-sets] [x @ys]))
+  )
+
+(defn LL1-parser-firsts []
+  (into {} (for [[k vs] P]
+             (let [rprod-frsts (for [vi vs :when (not= vi [])]
+                                 [vi (first-set-str vi)])]
+
+               [k
+                [
+                  (for [[i elem] (map-indexed vector
+                                   rprod-frsts)]
+                    [elem (inc i)]
+                    )
+
+                  (= (some #{[]} vs) [])
+                  ]
+                ]
+               ))))
+
+(defn get-LL1-parser-java []
+  (let [
+         fs (LL1-parser-firsts)
+
+         first-sets-values (flatten (for [[k [vs _]] fs]
+                                      (for [[vis i] vs]
+                                        {
+                                          :name (str k i)
+                                          :tokens (cstr/join ", " (nth vis 1))
+                                          }
+                                        )))
+
+         productions (for [[k [values epsilon]] fs]
+                       {
+                         :epsilon epsilon
+                         :name k
+                         :firsts (for [[vi i] values]
+                                   {
+                                     :i i
+                                     :symbols (for [symbol_i (nth vi 0)]
+                                                {
+                                                  :name symbol_i
+                                                  :is-token (sigma symbol_i)
+                                                  }
+                                                )
+                                     }
+                                   )
+
+                         :firsts-values (cstr/join ", "
+                                          (for [[_ i] values] (str "first" k i)))
+                         }
+                       )
+         ]
+
+    (render-resource "templates/parser.mustache"
+      (into (grammar 'config) {
+                                :first-sets-values first-sets-values
+                                :S S
+                                :productions productions
+                                }))
+
+    )
   )
