@@ -24,6 +24,6 @@
                   [de.ubercode.clostache/clostache "1.4.0"]
                   ]
 
-  :main ^:skip-aot temp
+;  :main ^:skip-aot temp
 
   )
