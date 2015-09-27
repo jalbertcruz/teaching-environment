@@ -195,6 +195,7 @@
                        {
                          :epsilon epsilon
                          :name k
+                         :rightParts (cstr/join " | " (map #(cstr/join " " %) (P k)))
                          :firsts (for [[vi i] values]
                                    {
                                      :i i

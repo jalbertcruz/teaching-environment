@@ -40,7 +40,8 @@ public class Parser extends SyntaxAnalyzer<{{kTypeName}}, ASTVisitor, {{tTypeNam
         }
 
         {{#productions}}
-
+        
+        // {{name}} -> {{rightParts}};
         public Object {{name}}() {
             int productionSelected = selectProduction({{firsts-values}});
             switch (productionSelected) {
